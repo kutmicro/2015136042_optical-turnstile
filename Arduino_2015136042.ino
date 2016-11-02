@@ -7,6 +7,8 @@ int trig=4; //초음파출력 핀번호
 int echo=5; //초음파입력 핀번호
 int piezo=6; //부저 핀번호
 LiquidCrystal lcd(7,8,9,10,11,12); //LCD 핀번호
+//LiquidCrystal 라이브러리를 초기화하는 명령어
+// lcd(RS,E,D4,D5,D6,D7)
 int inputPin=13; //인체 감지센서 핀번호
 
 int val=0; // 인체감지센서 초기화
@@ -29,16 +31,19 @@ pinMode(echo,INPUT);
 pinMode(inputPin,INPUT);
 pinMode(piezo,OUTPUT);
 
-lcd.begin(16,2); //16*2 LCD
+lcd.begin(16,2); //lcd.begin(행,열)
+//LCD의 높낮이를 설정하는 명령어
 lcd.print("Boundary state"); //초기 LCD 상태
-lcd.setCursor(0,1);
+//lcd에 텍스트를 출력하는 명령어
+lcd.setCursor(0,1);//lcd의 현재 커서를 설정하는 명령어
+//첫번째 열 두번째 행에 커서를 위치시킴
 lcd.print(": OFF");
 }
 
 void loop() {
 
 
-//ultraSonic();//초음파 신호
+ultraSonic();//초음파 신호
 
  if(state){//경계 상태일 때
   
@@ -60,10 +65,13 @@ Display_LCD(0);//ON 상태의 LCD 로드
 }
 
 void ultraSonic(){
-  digitalWrite(trig,HIGH);
-  delayMicroseconds(10);
-  digitalWrite(trig,LOW);
-  distance = pulseIn(echo,HIGH)*17/1000;
+  digitalWrite(trig,HIGH); // 센서에 Trig 신호 입력
+  delayMicroseconds(10);//10us 정도 유지
+  digitalWrite(trig,LOW); // Trig 신호 off
+  
+  distance = pulseIn(echo,HIGH)*17/1000;//Echo pin: HIGH->Low 간격 측정 
+  //17/1000 은 들어오는 값을 cm형태로 나타내기 위한 값
+  //pulseIn(핀,값) 
   Serial.println(distance);
   delay(100);
 }

@@ -24,30 +24,30 @@ int min_range= 10;//초음파 감지 최소값
 int max_range= 20;//초음파 감지 최대값
 bool isDetected = false;
 bool state=false;
-
+bool bf_isDetected=false;
 void mycb_numdata_handler(char *tagid, int numval);
 
 /*
 Arduino Shield
 */
 
-Shield_Wrapper	g_shield;
+Shield_Wrapper  g_shield;
 
-#define SDCARD_CS	4
+#define SDCARD_CS 4
 void sdcard_deselect()
 {
-	pinMode(SDCARD_CS, OUTPUT);
-	digitalWrite(SDCARD_CS, HIGH); //Deselect the SD card
+  pinMode(SDCARD_CS, OUTPUT);
+  digitalWrite(SDCARD_CS, HIGH); //Deselect the SD card
 }
 void init_shield()
 {
-	sdcard_deselect();
-	
-	const char* WIFI_SSID = "test";
-	//const char* WIFI_PASS = "new1234!";
-	g_shield.begin(WIFI_SSID);
+  sdcard_deselect();
+  
+  const char* WIFI_SSID = "test";
+  //const char* WIFI_PASS = "new1234!";
+  g_shield.begin(WIFI_SSID);
 
-	g_shield.print();
+  g_shield.print();
 }
 
 
@@ -62,32 +62,32 @@ const char extrSysID[]  = "OPEN_TCP_001PTL001_1000002977";
 
 void init_iotmakers()
 {
-	Client* client = g_shield.getClient();
-	if ( client == NULL )	{
-		Serial.println(F("No client from shield."));
-		while(1);
-	}
+  Client* client = g_shield.getClient();
+  if ( client == NULL ) {
+    Serial.println(F("No client from shield."));
+    while(1);
+  }
 
-	g_im.init(deviceID, authnRqtNo, extrSysID, *client);
-	
-	g_im.set_numdata_handler(mycb_numdata_handler);
+  g_im.init(deviceID, authnRqtNo, extrSysID, *client);
+  
+  g_im.set_numdata_handler(mycb_numdata_handler);
 
-	// IoTMakers 서버 연결
-	Serial.println(F("connect()..."));
-	while ( g_im.connect() < 0 ){
-		Serial.println(F("retrying."));
-		delay(3000);
-	}
+  // IoTMakers 서버 연결
+  Serial.println(F("connect()..."));
+  while ( g_im.connect() < 0 ){
+    Serial.println(F("retrying."));
+    delay(3000);
+  }
 
-	// Auth
+  // Auth
 
-	Serial.println(F("auth."));
-	while ( g_im.auth_device() < 0 ) {
-		Serial.println(F("fail"));
-		while(1);
-	}
+  Serial.println(F("auth."));
+  while ( g_im.auth_device() < 0 ) {
+    Serial.println(F("fail"));
+    while(1);
+  }
 
-	Serial.print(F("FreeRAM="));Serial.println(g_im.getFreeRAM());
+  Serial.print(F("FreeRAM="));Serial.println(g_im.getFreeRAM());
 }
 
 int send_sonic();
@@ -100,10 +100,10 @@ void Display_LCD(int n);
 
 void setup() 
 {
-	Serial.begin(115200);
-  	while ( !Serial )  {
-	  ;
-	}
+  Serial.begin(115200);
+    while ( !Serial )  {
+    ;
+  }
 pinMode(trig,OUTPUT);
 pinMode(echo,INPUT); 
 pinMode(inputPin,INPUT);
@@ -117,21 +117,21 @@ lcd.setCursor(0,1);//lcd의 현재 커서를 설정하는 명령어
 //첫번째 열 두번째 행에 커서를 위치시킴
 lcd.print(": OFF");
 
-	init_shield();
-	
-	init_iotmakers();
+  init_shield();
+  
+  init_iotmakers();
 
 
 }
 
 void loop()
 {
-	static unsigned long tick = millis();
+  static unsigned long tick = millis();
 
-	// 3초 주기로 센서 정보 송신
-	if ( ( millis() - tick) > 3000 )
-	{
-	    ultraSonic();//초음파 신호
+  // 3초 주기로 센서 정보 송신
+  if ( ( millis() - tick) > 3000 )
+  {
+      ultraSonic();//초음파 신호
       IR_sensor();
      Serial.println();
      
@@ -151,15 +151,16 @@ Display_LCD(0);//ON 상태의 LCD 로드
     Display_LCD(1);//OFF 상태의 LCD 로드 
     }
     
-		send_IR();
+    send_IR();
     send_sonic();
-	 
+   
 
-		tick = millis();
- 	}
+    tick = millis();
+  }
   
-	// IoTMakers 서버 수신처리 및 keepalive 송신
-	g_im.loop();
+  // IoTMakers 서버 수신처리 및 keepalive 송신
+  g_im.loop();
+  bf_isDetected=isDetected;//이전의 기록값기록
 }
 
 
@@ -179,6 +180,7 @@ int send_IR(){
 }
 int send_isDetected()
 {
+if(bf_isDetected!=isDetected){
   char* is_Detected="*";
   if(isDetected==true)
   strcpy(is_Detected,"O");
@@ -190,6 +192,8 @@ int send_isDetected()
     return -1;
   }
   return 0;   
+}
+return 0;
 }
 
 int send_sonic()
@@ -209,7 +213,7 @@ void IR_sensor(){
 
 void mycb_numdata_handler(char *tagid, double numval)
 {
-	if ( strcmp(tagid, "state") == 0  )  { 
+  if ( strcmp(tagid, "state") == 0  )  { 
     Serial.println("my ");
         if(numval==1){
       state=true;

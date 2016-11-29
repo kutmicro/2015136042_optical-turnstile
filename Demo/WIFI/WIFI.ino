@@ -1,30 +1,25 @@
 /*
-  WiFi Web Server LED Blink
-
- A simple web server that lets you blink an LED via the web.
+  WiFi Web Server Buzzer on & off
  This sketch will print the IP address of your WiFi Shield (once connected)
  to the Serial monitor. From there, you can open that address in a web browser
- to turn on and off the LED on pin 9.
-
+ to turn on and off the Buzzer on pin 6.
  If the IP address of your shield is yourAddress:
- http://yourAddress/H turns the LED on
- http://yourAddress/L turns it off
-
+ http://yourAddress/H turns the buzzer on
+ http://yourAddress/L turns it buzzer
  This example is written for a network using WPA encryption. For
  WEP or WPA, change the Wifi.begin() call accordingly.
-
  Circuit:
  * WiFi shield attached
- * LED attached to pin 9
-
+ * Buzzer attached to pin 6
  created 25 Nov 2012
  by Tom Igoe
+ modified 25 Nov 2016
+ by Tong Il Kim
  */
 #include <SPI.h>
 #include <WiFi.h>
 
-char ssid[] = "yourNetwork";      //  your network SSID (name)
-char pass[] = "secretPassword";   // your network password
+char ssid[] = "egkim";      //  your network SSID (name)
 int keyIndex = 0;                 // your network key Index number (needed only for WEP)
 
 int status = WL_IDLE_STATUS;
@@ -32,7 +27,7 @@ WiFiServer server(80);
 
 void setup() {
   Serial.begin(9600);      // initialize serial communication
-  pinMode(9, OUTPUT);      // set the LED pin mode
+  pinMode(6, OUTPUT);      // set the LED pin mode
 
   // check for the presence of the shield:
   if (WiFi.status() == WL_NO_SHIELD) {
@@ -51,7 +46,7 @@ void setup() {
     Serial.println(ssid);                   // print the network name (SSID);
 
     // Connect to WPA/WPA2 network. Change this line if using open or WEP network:
-    status = WiFi.begin(ssid, pass);
+    status = WiFi.begin(ssid);
     // wait 10 seconds for connection:
     delay(10000);
   }
@@ -82,8 +77,8 @@ void loop() {
             client.println();
 
             // the content of the HTTP response follows the header:
-            client.print("Click <a href=\"/H\">here</a> turn the LED on pin 9 on<br>");
-            client.print("Click <a href=\"/L\">here</a> turn the LED on pin 9 off<br>");
+            client.print("Click <a href=\"/H\">here</a> turn the buzzer on pin 6 on<br>");
+            client.print("Click <a href=\"/L\">here</a> turn the buzzer on pin 6 off<br>");
 
             // The HTTP response ends with another blank line:
             client.println();
@@ -98,10 +93,10 @@ void loop() {
 
         // Check to see if the client request was "GET /H" or "GET /L":
         if (currentLine.endsWith("GET /H")) {
-          digitalWrite(9, HIGH);               // GET /H turns the LED on
+          digitalWrite(6, HIGH);               // GET /H turns the LED on
         }
         if (currentLine.endsWith("GET /L")) {
-          digitalWrite(9, LOW);                // GET /L turns the LED off
+          digitalWrite(6, LOW);                // GET /L turns the LED off
         }
       }
     }

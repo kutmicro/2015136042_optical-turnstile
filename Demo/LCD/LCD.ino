@@ -19,8 +19,12 @@ void Display_LCD(int n);
 
 
 void loop() {
- int x=Serial.read();
- Display_LCD(x);
+// int x=Serial.read();
+ //Display_LCD(x);
+ for(int i=0;i<3;i++){
+ delay(2500);
+  Display_LCD(i);
+ }
 
 }
 

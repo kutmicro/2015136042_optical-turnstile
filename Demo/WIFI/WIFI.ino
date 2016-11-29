@@ -8,7 +8,7 @@
  http://yourAddress/L turns it buzzer
  This example is written for a network using WPA encryption. For
  WEP or WPA, change the Wifi.begin() call accordingly.
- Circuit:
+ Circ
  * WiFi shield attached
  * Buzzer attached to pin 6
  created 25 Nov 2012
@@ -27,7 +27,7 @@ WiFiServer server(80);
 
 void setup() {
   Serial.begin(9600);      // initialize serial communication
-  pinMode(6, OUTPUT);      // set the LED pin mode
+  pinMode(6, OUTPUT);      // set the Buzzer pin mode
 
   // check for the presence of the shield:
   if (WiFi.status() == WL_NO_SHIELD) {
@@ -93,10 +93,10 @@ void loop() {
 
         // Check to see if the client request was "GET /H" or "GET /L":
         if (currentLine.endsWith("GET /H")) {
-          digitalWrite(6, HIGH);               // GET /H turns the LED on
+          digitalWrite(6, HIGH);               // GET /H turns the Buzzer on
         }
         if (currentLine.endsWith("GET /L")) {
-          digitalWrite(6, LOW);                // GET /L turns the LED off
+          digitalWrite(6, LOW);                // GET /L turns the Buzzer off
         }
       }
     }

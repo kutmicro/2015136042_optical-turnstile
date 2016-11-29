@@ -24,6 +24,7 @@ void ultraSonic(){
   distance = pulseIn(echo,HIGH)*17/1000;//Echo pin: HIGH->Low 간격 측정 
   //17/1000 은 들어오는 값을 cm형태로 나타내기 위한 값
   //pulseIn(핀,값) 
+  Serial.println(distance);
   delay(100);
 }
 

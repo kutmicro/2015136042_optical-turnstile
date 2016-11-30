@@ -8,7 +8,7 @@
 #include "Shield_Wrapper.h"
 
 
-
+long time =millis();
 
 int trig=4; //초음파출력 핀번호
 int echo=5; //초음파입력 핀번호
@@ -26,6 +26,7 @@ bool isDetected = false;
 bool state=false;
 bool bf_isDetected=false;
 bool buzzer=false;
+bool buzzerToggle = false;
 void mycb_numdata_handler(char *tagid, int numval);
 
 /*
@@ -44,8 +45,8 @@ void init_shield()
 {
   sdcard_deselect();
   
-  const char* WIFI_SSID = "test";
-  //const char* WIFI_PASS = "new1234!";
+  const char* WIFI_SSID = "iptime";
+ // const char* WIFI_PASS = "rlatkddus";
   g_shield.begin(WIFI_SSID);
 
   g_shield.print();
@@ -136,13 +137,13 @@ void loop()
       IR_sensor();
      Serial.println();
      
- if(state){//경계 상태일 때
-  isDetected=((distance >= min_range && distance <= max_range)
-  || val==HIGH);
+    if(state){//경계 상태일 때
+    isDetected=((distance >= min_range && distance <= max_range)
+    || val==HIGH);
   
 Display_LCD(0);//ON 상태의 LCD 로드
  if(isDetected){
-    piezo_buzzer(buzzer);//isDetected 값이 참이면 소음 발생  
+    //piezo_buzzer(buzzer);//isDetected 값이 참이면 소음 발생   // 아래에 따로 정리함.
     Display_LCD(2); //침입감지 상태의 LCD 로드
 }
  send_isDetected();
@@ -157,6 +158,15 @@ Display_LCD(0);//ON 상태의 LCD 로드
    
 
     tick = millis();
+  }
+
+  if(isDetected == true && millis() % 250 == 0) {
+    if(buzzerToggle) {
+      digitalWrite(piezo,HIGH);
+    }
+    else {
+      digitalWrite(piezo,LOW);
+    }
   }
   
   // IoTMakers 서버 수신처리 및 keepalive 송신
@@ -240,15 +250,16 @@ void ultraSonic(){
 }
 
 void piezo_buzzer(bool buzzer){
-  
-  
-    
-    digitalWrite(piezo,HIGH);
-    delay(300);
+    if(time + 1000 <millis()){
+      digitalWrite(piezo,HIGH);
+    delay(250);
     digitalWrite(piezo,LOW);
-    delay(300);
- 
-  
+    delay(250);
+    digitalWrite(piezo,HIGH);
+    delay(250);
+    digitalWrite(piezo,LOW);
+    delay(250);
+    } 
 }
 void Display_LCD(int n){
   switch (n) {

@@ -1,0 +1,30 @@
+#######################################
+# Syntax Coloring Map For Bridge
+#######################################
+
+#######################################
+# Class (KEYWORD1)
+#######################################
+
+IoTMakers	KEYWORD1	YunIoTMakersLibrary
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+# methods names in commond
+connect			KEYWORD2
+disconnect		KEYWORD2
+auth_device		KEYWORD2
+send_numdata		KEYWORD2
+send_strdata		KEYWORD2
+loop			KEYWORD2
+set_numdata_handler	KEYWORD2
+set_strdata_handler	KEYWORD2
+set_dataresp_handler	KEYWORD2
+set_error_handler	KEYWORD2
+
+
+#######################################
+# Constants (LITERAL1)
+#######################################

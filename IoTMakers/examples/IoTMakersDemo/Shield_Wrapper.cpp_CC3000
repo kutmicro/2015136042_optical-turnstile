@@ -1,0 +1,72 @@
+/*
+  Shield_Wrapper.cpp - Library for wrapping Ethernet.
+  Created by Kiucheol Shin(kiucheol.shin@kt.com), November 20, 2015.
+  Released into the public domain.
+*/
+
+#include <Adafruit_CC3000.h>
+#include <ccspi.h>
+#include <SPI.h>
+#include "utility/debug.h"
+
+#include "Shield_Wrapper.h"
+
+// These are the interrupt and control pins
+#define ADAFRUIT_CC3000_IRQ   3  // MUST be an interrupt pin!
+// These can be any two pins
+#define ADAFRUIT_CC3000_VBAT  5
+#define ADAFRUIT_CC3000_CS    10
+
+// Use hardware SPI for the remaining pins
+// On an UNO, SCK = 13, MISO = 12, and MOSI = 11
+Adafruit_CC3000 __cc3000 = Adafruit_CC3000(ADAFRUIT_CC3000_CS, 
+	ADAFRUIT_CC3000_IRQ, 
+	ADAFRUIT_CC3000_VBAT,
+	SPI_CLOCK_DIVIDER); // you can change this clock speed
+
+
+static Adafruit_CC3000_Client __client;
+
+
+Shield_Wrapper::Shield_Wrapper(){
+	_status = 0;
+}
+
+void Shield_Wrapper::begin(const char* ssid, const char* pass)
+{
+	Serial.println(F("begin CC3000!\n")); 
+	if (!__cc3000.begin())  {
+		Serial.println(F("fail begin()!"));
+		while(1);
+	}
+
+	Serial.print(F("connect to "));Serial.println(ssid);
+	if (!__cc3000.connectToAP(ssid, pass, WLAN_SEC_WPA2)) {
+		while(1);
+	}
+
+	while (!__cc3000.checkDHCP()) {
+		delay(100); // ToDo: Insert a DHCP timeout!
+		Serial.print(F("."));
+	}  
+}
+
+void Shield_Wrapper::disconnect(){
+	__cc3000.disconnect();
+}
+
+void Shield_Wrapper::print(){
+  uint32_t ipAddress, netmask, gateway, dhcpserv, dnsserv;
+  
+  if(!__cc3000.getIPAddress(&ipAddress, &netmask, &gateway, &dhcpserv, &dnsserv))  {
+    Serial.println(F("fail to get IP"));
+  }  else  {
+    Serial.print(F("IP: ")); __cc3000.printIPdotsRev(ipAddress);
+    Serial.print(F("GW: ")); __cc3000.printIPdotsRev(gateway);
+    Serial.println();
+  }
+}
+
+Client* Shield_Wrapper::getClient(){
+	return (Client*)&__client;
+}

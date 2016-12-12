@@ -2,7 +2,7 @@
 #include <SPI.h>
 #include <SoftwareSerial.h>//시리얼 통신 라이브러리 호출
 #include <LiquidCrystal.h> // LCD 라이브러리
-#include <WiFi.h>
+#include <WiFi.h>00
 
 #include "IoTMakers.h"
 #include "Shield_Wrapper.h"
@@ -33,17 +33,10 @@ Arduino Shield
 
 Shield_Wrapper  g_shield;
 
-#define SDCARD_CS 4
-void sdcard_deselect()
-{
-  pinMode(SDCARD_CS, OUTPUT);
-  digitalWrite(SDCARD_CS, HIGH); //Deselect the SD card
-}
 void init_shield()
 {
-  sdcard_deselect();
 
-  const char* WIFI_SSID = "iptime";
+  const char* WIFI_SSID = "egkim";
   // const char* WIFI_PASS = "rlatkddus";
   g_shield.begin(WIFI_SSID);
 
@@ -128,34 +121,33 @@ void loop()
 {
   static unsigned long tick = millis();
 
-  // 1초 주기로 센서 정보 송신
+  // 0.5초 주기로 센서 정보 송신
   if ((millis() - tick) > 500)
   {
-    ultraSonic();//초음파 신호
-    IR_sensor();
+    ultraSonic();//초음파 거리 측정
+    IR_sensor();//인체감지 측정
     Serial.println();
 
     if (state) {//경계 상태일 때
-      if(isDetected)
-        Display_LCD(2);
-      else{
+      if (isDetected)
+        Display_LCD(2); // 침입감지 상태 LCD 표기
+      else {
         isDetected = ((distance >= min_range && distance <= max_range)
-        || val == HIGH);
- send_isDetected();
-      Display_LCD(0);//ON 상태의 LCD 로드
-      if (isDetected) {
-        Display_LCD(2); //침입감지 상태의 LCD 로드
+          || val == HIGH); 
+        send_isDetected();//침입이 감지 되면 침입 상황을 서버에 전송
+        Display_LCD(0);//ON 상태의 LCD 로드
       }
-      }
-     
+
     }
-    else // 침입이 감지되지 않았을 때
+    else // 경계 상태가 아닐 때
     {
       Display_LCD(1);//OFF 상태의 LCD 로드 
     }
-if(isDetected)
-piezo_buzzer();
-    send_IR();
+    if (isDetected) {
+      piezo_buzzer(); //부저
+      Display_LCD(2); //침입감지 상태의 LCD 로드
+    }
+    send_IR(); 
     send_sonic();
 
 
@@ -165,14 +157,19 @@ piezo_buzzer();
   g_im.loop();
 }
 
+//---------------------------------------------------
 
 int send_IR() {
 
-  char* ir_result = "*";
+  char* ir_result = "*"; //서버에 보낼 문자열 초기화
   if (val == true)
-    strcpy(ir_result, "O");
+    // val 은 센서의 감지 여부
+    strcpy(ir_result, "O"); 
   else strcpy(ir_result, "X");
 
+  //IOT maker 함수 
+  // 서버 내부의 이름이 ir인 태그스트림에
+  //ir_result 문자열을 전송함
   Serial.print(F("IR : ")); Serial.println(ir_result);
   if (g_im.send_strdata("ir", ir_result) < 0) {
     Serial.println(F("fail"));
@@ -180,6 +177,9 @@ int send_IR() {
   }
   return 0;
 }
+
+//---------------------------------------------------
+
 int send_isDetected()
 {
 char* is_Detected="*";
@@ -196,8 +196,13 @@ char* is_Detected="*";
   
 }
 
+//---------------------------------------------------
+
 int send_sonic()
 {
+  //IOT maker 함수 
+  // 서버 내부의 이름이 sonic인 숫자형 태그스트림에
+  //distance 값을 전송함
   Serial.print(F("sonic : ")); Serial.println(distance);
   if (g_im.send_numdata("sonic", (double)distance) < 0) {
     Serial.println(F("fail"));
@@ -206,27 +211,37 @@ int send_sonic()
   return 0;
 }
 
+//---------------------------------------------------
+
 void IR_sensor() {
   //인체감지센서
   val = digitalRead(inputPin);//인체감지센서의 데이터를 저장함
 }
 
+//---------------------------------------------------
+
 void mycb_numdata_handler(char *tagid, double numval)
 {
+  //태그스트림 이름이 state 일 경우
   if (strcmp(tagid, "state") == 0) {
-    Serial.println("my ");
+    Serial.println("Input data from a server. ");
+    //data 값이 1 일 경우
     if (numval == 1) {
+      //state : true 일 경우 ON  / false 일 경우 OFF
       state = true;
       Serial.println("state : true");
     }
     else {
+      // OFF로 전환
       state = false;
       Serial.println("state : false");
     }
   }
 }
+//---------------------------------------------------
 void ultraSonic() {
-  digitalWrite(trig, HIGH); // 센서에 Trig 신호 입력
+  //trig : 센서의 
+  digitalWrite(trig, HIGH); // 센서 Trig 신호 on
   delayMicroseconds(10);//10us 정도 유지
   digitalWrite(trig, LOW); // Trig 신호 off
 
@@ -235,18 +250,18 @@ void ultraSonic() {
                          //pulseIn(핀,값) 
   delay(100);
 }
-
+//---------------------------------------------------
 void piezo_buzzer() {
-if(state)
+  if (state)
     digitalWrite(piezo, HIGH);
- else{
+  else {
     digitalWrite(piezo, LOW);
-    isDetected=false;
-   
- }
- 
+    isDetected = false; //감지 여부 초기화
+              //초기 상태로 돌아감 OFF 상태
 
+  }
 }
+//---------------------------------------------------
 void Display_LCD(int n) {
   switch (n) {
   case 0:  //ON 상태
